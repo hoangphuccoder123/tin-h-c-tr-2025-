@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tư Vấn Nghề Nghiệp AI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background-color: #343541;
+      color: #ececf1;
+    }
+
+    /* Header Styles */
+    .header {
+      background-color: rgba(32, 33, 35, 0.9);
+      backdrop-filter: blur(10px);
+      padding: 0.8rem 1.5rem;
+      border-bottom: 1px solid rgba(68, 70, 84, 0.5);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .nav-brand {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #10a37f;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      margin-right: auto;
+    }
+
+    .nav-links a {
+      color: #ececf1;
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 700; /* Changed from 500 to 700 for bold text */
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: #10a37f;
+      background: rgba(16, 163, 127, 0.1);
+    }
+
+    .nav-links a.active {
+      color: #10a37f;
+      background: rgba(16, 163, 127, 0.15);
+    }
+  
+    .auth-buttons {
+      display: flex;
+      gap: 0.8rem;
+    }
+    .auth-button {
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .login {
+      background: transparent;
+      border: 1px solid rgba(68, 70, 84, 0.5);
+      color: #ececf1;
+    }
+
+    .login:hover {
+      border-color: #10a37f;
+      color: #10a37f;
+      background: rgba(16, 163, 127, 0.1);
+    }
+
+    .signup {
+      background: #10a37f;
+      border: none;
+      color: white;
+    }
+
+    .signup:hover {
+      background: #0e8a6e;
+    }
+
+    /* Add new nav search styles */
+    .nav-search {
+      display: flex;
+      gap: 0.8rem;
+      align-items: center;
+      margin-right: 1rem;
+      position: relative;
+    }
+
+    .nav-search input[type="text"] {
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(68, 70, 84, 0.5);
+      color: #ececf1;
+      font-size: 0.95rem;
+      width: 250px;
+    }
+
+    .nav-search button {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      background: #10a37f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .nav-search button:hover {
+      background: #0e8a6e;
+    }
+
+    .search-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #202123;
+      border: 1px solid #444654;
+      border-radius: 6px;
+      margin-top: 5px;
+      padding: 10px;
+      z-index: 1000;
+      display: none;
+    }
+
+    .search-dropdown.active {
+      display: block;
+    }
+
+    .search-dropdown a {
+      color: #ececf1;
+      text-decoration: none;
+      display: block;
+      padding: 8px;
+      border-radius: 4px;
+    }
+
+    .search-dropdown a:hover {
+      background: rgba(16, 163, 127, 0.1);
+      color: #10a37f;
+    }
+
+    /* Main Content Area */
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Bố cục trang với tỷ lệ 7/3 cho hai cột */
+    .content {
+      display: flex;
+      flex: 1;
+    }
+
+    /* Cột trò chuyện */
+    .chat-column {
+      flex: 7;
+      display: flex;
+      flex-direction: column;
+      border-right: 2px solid #444654;
+      padding: 20px;
+      box-sizing: border-box;
+      min-height: calc(100vh - 250px); /* Reduced from default to accommodate shorter footer */
+    }
+
+    .chat-column h2 {
+      font-size: 80%;
+      margin-bottom: 10px;
+    }
+
+    /* Khu vực hiển thị tin nhắn */
+    #chatbox {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #444654;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #202123;
+    }
+
+    /* Khung nhập tin nhắn */
+    .input-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #444654;
+      border-radius: 4px;
+      background-color: #343541;
+      color: #ececf1;
+    }
+
+    button {
+      padding: 8px 12px;
+      background-color: #10a37f;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0e8a6e;
+    }
+
+    .action-button {
+      padding: 8px;
+      background: transparent;
+      border: 1px solid #444654;
+      border-radius: 4px;
+      color: #ececf1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-button:hover {
+      background: rgba(16, 163, 127, 0.1);
+      border-color: #10a37f;
+      color: #10a37f;
+    }
+
+    .action-button.recording {
+      background: rgba(255, 0, 0, 0.1);
+      border-color: #ff0000;
+      color: #ff0000;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message {
+      animation: fadeIn 0.5s ease;
+    }
+
+    /* Cột tra cứu */
+    .search-column {
+      flex: 3;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* Khu vực tra cứu */
+    .search-box {
+      border: 1px solid #444654;
+      border-radius: 8px;
+      padding: 10px;
+      background-color: #202123;
+    }
+  
+    /* Giao diện thẻ kết quả tra cứu */
+    .search-results {
+      margin-top: 10px;
+      border-top: 1px solid #444654;
+      padding-top: 10px;
+    }
+
+    .search-results p {
+      margin: 5px 0;
+    }
+
+    /* Message Styling */
+    .message {
+      padding: 12px 16px;
+      margin: 8px 0;
+      border-radius: 8px;
+      line-height: 1.5;
+      font-size: 15px;
+    }
+
+    .bot-message {
+      background: #444654;
+      border-left: 4px solid #10a37f;
+    }
+
+    .user-message {
+      background: #343541;
+      border-left: 4px solid #007bff;
+    }
+
+    .message p {
+      margin: 0;
+      padding: 4px 0;
+    }
+
+    .message strong {
+      color: #10a37f;
+      font-weight: 600;
+    }
+
+    .message ul {
+      margin: 8px 0;
+      padding-left: 24px;
+    }
+
+    .message li {
+      margin: 6px 0;
+      color: #ececf1;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .nav {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .nav-links {
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+      }
+
+      .auth-buttons {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .content {
+        flex-direction: column;
+      }
+    }
+
+    /* Footer Styles */
+    .footer {
+      background-color: #202123;
+      padding: 1rem 2rem; /* Giảm padding top/bottom từ 2rem xuống 1rem */
+      margin-top: auto;
+      border-top: 1px solid #444654;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; /* Giảm gap từ 3rem xuống 1.5rem */
+      padding: 0 1rem;
+    }
+
+    .footer-section {
+      color: #ececf1;
+    }
+
+    .footer-section h3 {
+      font-size: 0.9rem; /* Giảm font size */
+      margin-bottom: 0.5rem; /* Giảm margin bottom */
+      color: #10a37f;
+    }
+
+    .footer-section ul {
+      list-style: none;
+    }
+
+    .footer-section li {
+      margin-bottom: 0.3rem; /* Giảm margin bottom của list items */
+    }
+
+    .footer-section a {
+      color: #ececf1;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.3s ease;
+    }
+
+    .footer-section a:hover {
+      color: #10a37f;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .social-links a {
+      color: #ececf1;
+      font-size: 1.5rem;
+    }
+
+    .partners-section {
+      display: grid;
+      grid-template-columns: 2fr 1fr 2fr;
+      gap: 1rem;
+      align-items: center;
+      padding: 10px;
+      background: linear-gradient(180deg, rgba(32, 33, 35, 0.8), rgba(32, 33, 35, 0.4));
+      border-radius: 8px;
+    }
+
+    .handshake-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #10a37f;
+      font-size: 1.5rem;
+      opacity: 0.8;
+      animation: pulse 2s infinite;
+    }
+
+    .partner-card {
+      text-align: center;
+      padding: 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .partner-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .partner-logo {
+      height: 35px;
+      width: auto;
+      filter: brightness(1.2) contrast(1.1);
+      transition: all 0.3s ease;
+    }
+
+    .partner-logo:hover {
+      filter: brightness(1.4) contrast(1.2);
+    }
+
+    .partner-name {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #ececf1;
+      opacity: 0.8;
+    }
+
+    .footer-bottom {
+      margin-top: 1rem; /* Giảm margin top */
+      padding-top: 0.5rem; /* Giảm padding top */
+      border-top: 1px solid #444654;
+      text-align: center;
+      color: #ececf1;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 768px) {
+      .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .footer-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .partners-header {
+      text-align: center;
+      font-size: 1.3rem;
+      margin-bottom: 1.2rem;
+      color: #10a37f;
+    }
+  </style>
+  <!-- AI & Machine Learning Libraries -->
+  <!-- TensorFlow.js - Core framework for machine learning in browser -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  
+  <!-- TensorFlow.js models - Pre-trained models -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection@latest"></script>
+  
+  <!-- ml5.js - Friendly high-level interface to TensorFlow.js -->
+  <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+  
+  <!-- brain.js - Neural networks in JavaScript -->
+  <script src="https://unpkg.com/brain.js"></script>
+  
+  <!-- Synaptic - Architecture-free neural network library -->
+  <script src="https://cdn.jsdelivr.net/npm/synaptic@1.1.4/dist/synaptic.min.js"></script>
+  
+  <!-- OpenCV.js - Computer vision library -->
+  <script async src="https://docs.opencv.org/master/opencv.js" type="text/javascript"></script>
+  
+  <!-- ConvNetJS - Deep Learning in browser -->
+  <script src="https://cdn.jsdelivr.net/npm/convnetjs@latest/build/convnet.js"></script>
+  
+  <!-- Transformers.js - Run Hugging Face models directly in the browser -->
+  <script src="https://cdn.jsdelivr.net/npm/@huggingface/inference@latest"></script>
+  
+  <!-- Natural - Natural language processing -->
+  <script src="https://unpkg.com/natural@latest/dist/natural.min.js"></script>
+  
+  <!-- Already included libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/machinelearning/dist/machinelearning.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/deeplearning/dist/deeplearning.min.js"></script>
+  <script src="/data AI/hướng nghiẹp/tổng hợp data.js"></script>
+</head>
+<body>
+  <!-- Header Navigation -->
+  <header class="header">
+    <nav class="nav">
+      <a href="#" class="nav-brand">TechFuture AI</a>
+      <div class="nav-links">
+        <a href="AIcv.html" class="active">CV TỰ ĐỘNG</a>
+        <a href="phongvan.html">PHỎNG VẤN AI</a>
+        <a href="hosoai.html">TUYỂN DỤNG AI</a>
+      </div>
+      <div class="nav-search">
+        <input type="text" id="searchQuery" placeholder="Tìm kiếm thông tin...">
+        <button id="search">Tra cứu</button>
+        <div id="searchDropdown" class="search-dropdown"></div>
+      </div>
+      <div class="auth-buttons">
+        <a href="login.html"><button class="auth-button login">Login</button></a>
+      </div>
+    </nav>
+  </header>
+  <div class="main-container">
+    <div class="content">
+      <!-- Cột Chatbot -->
+      <div class="chat-column">
+        <h2>Chatbot Tư Vấn Nghề Nghiệp</h2>
+        <div id="chatbox"></div>
+        <div class="input-container">
+          <button class="action-button" id="micButton" title="Bấm để nói">
+            <i class="fas fa-microphone"></i>
+          </button>
+          <input type="text" id="userMessage" placeholder="Nhập câu hỏi về nghề nghiệp...">
+          <button id="send">Gửi</button>
+          <button class="action-button" id="clearChat" title="Xóa cuộc trò chuyện">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Về TechFuture AI</h3>
+          <ul>
+            <li><a href="#">Giới thiệu</a></li>
+            <li><i class="fas fa-phone"></i> Hotline: 0899280108</li>
+            <li><i class="fas fa-envelope"></i> Email: hoanphuc135@gmail.com</li>
+          </ul>
+          <div class="social-links">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-linkedin"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+            <a href="#"><i class="fab fa-github"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h3>Dịch vụ</h3>
+          <ul>
+            <li><a href="#">Tư vấn nghề nghiệp AI</a></li>
+            <li><a href="AIcv.html">ChatBot CV tự động</a></li>
+            <li><a href="phongvan.html">ChatBot phỏng vấn</a></li>
+            <li><a href="hosoai.html">ChatBot tuyển dụng</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h3 style="text-align: center; color: #10a37f; margin-bottom: 1rem;">Hỗ Trợ Đồng Hành</h3>
+          <div class="partners-section">
+            <div class="partner-card">
+              <a href="https://daihoc.fpt.edu.vn/" target="_blank">
+                <img src="fpt uni.jpg" alt="FPT University Logo" class="partner-logo">
+                <div class="partner-name">FPT University</div>
+              </a>
+            </div>
+            <div class="handshake-icon">
+              <i class="fas fa-handshake"></i>
+            </div>
+            <div class="partner-card">
+              <a href="https://fschool.fpt.edu.vn/" target="_blank">
+                <img src="FPT SCHOOL.jpg" alt="FPT School Logo" class="partner-logo">
+                <div class="partner-name">FPT School</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2024 TechFuture AI. Tất cả quyền được bảo lưu.</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Import Google Generative AI with fallback -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+  </script>
+  <script nomodule src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+
+  <script type="module">
+    import { GoogleGenerativeAI } from "@google/generative-ai";
+
+    // Hàm chuyển đổi markdown sang plain text
+    function convertMarkdownToPlainText(text) {
+      return text.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1');
+    }
+
+    const API_KEY = 'AIzaSyAXZGbJsHN_CJpbBmdDx18u-dBH3JsuBkQ'; // Thay thế bằng API key của bạn
+    const sheetsApiKey = 'AIzaSyB4hN-MhE5rmVM9Q_Ak4x2QkrXAI29-4e8'; // API key Google Sheets của bạn
+    const sheetId = '13s4nVD87Gk2xEkg_GsXcsbq7Q3IZx7f_nkQyvYKLgNk'; // ID Google Sheet chứa dữ liệu nghề nghiệp
+    const range = 'html data'; // Tên sheet chứa dữ liệu
+    const genAI = new GoogleGenerativeAI(API_KEY);
+
+    // Hàm lấy dữ liệu nghề nghiệp từ Google Sheets
+    async function fetchJobDataFromSheet() {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${sheetsApiKey}`;
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Lỗi khi lấy dữ liệu: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data.values || []; // Dữ liệu dạng [[câu hỏi, câu trả lời], ...]
+      } catch (error) {
+        console.error("Có lỗi xảy ra:", error);
+        return [];
+      }
+    }
+
+    // Hàm lưu dữ liệu vào Google Sheets
+    async function saveDataToGoogleSheet(data) {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED&key=${sheetsApiKey}`;
+      const body = {
+        values: [data],
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Lỗi khi lưu dữ liệu: ${response.statusText}`);
+        }
+        console.log("Dữ liệu đã được lưu vào Google Sheet.");
+      } catch (error) {
+        console.error("Có lỗi xảy ra:", error);
+      }
+    }
+
+    async function setupChat() {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const chat = model.startChat({
+        history: [
+          { role: "user", parts: [{ text: "Xin chào! Tôi muốn biết về các ngành nghề." }] },
+        ],
+        generationConfig: { 
+          maxOutputTokens: 1000,
+          temperature: 0.8,
+          topP: 0.8,
+          topK: 40,
+        },
+        safetySettings: [
+          {
+            category: "HARM_CATEGORY_HARASSMENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE",
+          },
+        ],
+      });
+
+      // Updated system prompt to handle numeric inputs (1-4) correctly
+      await chat.sendMessage(`Bạn là trợ lý AI chuyên về tư vấn hướng nghiệp theo mô hình Holland RIASEC.
+Khi người dùng nhập số từ 1 đến 4, hãy phản hồi chính xác như sau:
+1: "Khám phá kiểu tính cách Holland của bạn"
+2: "Tìm hiểu về 6 nhóm tính cách RIASEC"
+3: "Phân tích nghề nghiệp phù hợp với tính cách"
+4: "Tư vấn lộ trình phát triển cụ thể"
+Nếu không phải là số từ 1-4, hãy trả lời bình thường.`);
+
+      // Updated system prompt for exploring Holland personality type
+      await chat.sendMessage(`Khi người dùng muốn khám phá kiểu tính cách Holland của mình, hãy thực hiện theo các bước sau:
+1. Giới thiệu về mô hình Holland: "Holland Code phân loại tính cách nghề nghiệp thành 6 nhóm chính: Realistic (R), Investigative (I), Artistic (A), Social (S), Enterprising (E), Conventional (C). Mỗi nhóm có những đặc điểm và sở thích nghề nghiệp riêng."
+2. Hướng dẫn tự khám phá: "Để khám phá kiểu tính cách của mình, bạn hãy trả lời một số câu hỏi về sở thích và xu hướng công việc. Dựa trên các câu trả lời, tôi sẽ giúp bạn xác định nhóm tính cách phù hợp nhất."
+3. Cung cấp bài kiểm tra ngắn (nếu cần): "Nếu bạn muốn, tôi có thể giúp bạn làm một bài kiểm tra ngắn để xác định nhóm tính cách Holland của mình. Bạn có muốn bắt đầu không?"
+4. Giải thích kết quả và gợi ý nghề nghiệp: "Sau khi hoàn thành bài kiểm tra, tôi sẽ giải thích về kiểu tính cách của bạn và gợi ý các nghề nghiệp phù hợp. Ví dụ: Nếu bạn có tính cách 'Investigative', bạn có thể thích nghề nghiên cứu viên, kỹ sư hoặc nhà phân tích dữ liệu."
+5. Khuyến khích tự khám phá thêm: "Bạn có thể tìm hiểu thêm về các nhóm tính cách khác và những nghề nghiệp liên quan. Tôi sẵn sàng cung cấp thêm thông tin chi tiết nếu bạn cần."
+`);
+
+      // Add welcome message when chat initializes
+      const welcomeMessage = `
+        <div class="message bot-message">
+          <p><strong>Bot:</strong> Xin chào! Mình là trợ lý AI tư vấn hướng nghiệp theo mô hình Holland RIASEC.</p>
+          <p>Để giúp bạn tìm ra nghề nghiệp phù hợp, hãy chọn một chủ đề để bắt đầu:</p>
+          <ul>
+            <li>1️⃣ Khám phá kiểu tính cách Holland của bạn</li>
+            <li>2️⃣ Tìm hiểu về 6 nhóm tính cách RIASEC</li>
+            <li>3️⃣ Phân tích nghề nghiệp phù hợp với tính cách</li>
+            <li>4️⃣ Tư vấn lộ trình phát triển cụ thể</li>
+          </ul>
+          <p>Bạn hãy chọn số từ 1-4 hoặc đặt câu hỏi về bất kỳ chủ đề nào bạn quan tâm nhé!</p>
+        </div>
+      `;
+      document.getElementById("chatbox").innerHTML = welcomeMessage;
+
+      async function handleUserChoice(choice) {
+        let nextPrompt = '';
+        switch(choice) {
+          case '1':
+            nextPrompt = "Khám phá kiểu tính cách Holland của bạn";
+            break;
+          case '2':
+            nextPrompt = "Tìm hiểu về 6 nhóm tính cách RIASEC";
+            break;
+          case '3':
+            nextPrompt = "Phân tích nghề nghiệp phù hợp với tính cách";
+            break;
+          case '4':
+            nextPrompt = "Tư vấn lộ trình phát triển cụ thể";
+            break;
+          default:
+            return false;
+        }
+        
+        document.getElementById("chatbox").innerHTML += `
+          <div class="message bot-message">
+            <p><strong>Bot:</strong> ${nextPrompt}</p>
+          </div>
+        `;
+        return true;
+      }
+
+      const jobData = await fetchJobDataFromSheet();
+
+      // Add enter key handler for chat input
+      document.getElementById("userMessage").addEventListener("keypress", async (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById("send").click();
+        }
+      });
+
+      document.getElementById("send").addEventListener("click", async () => {
+        const userMessage = document.getElementById("userMessage").value;
+        if (!userMessage.trim()) return;
+        
+        document.getElementById("chatbox").innerHTML += `
+          <div class="message user-message">
+            <p><strong>Bạn:</strong> ${userMessage}</p>
+          </div>
+        `;
+        document.getElementById("userMessage").value = '';
+
+        // Kiểm tra nếu người dùng chọn số từ 1-4
+        if (/^[1-4]$/.test(userMessage)) {
+          if (await handleUserChoice(userMessage)) {
+            document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+            return;
+          }
+        }
+
+        // Xử lý câu trả lời thông thường
+        let responseText = jobData.find(([question]) => userMessage.includes(question))?.[1];
+        
+        if (!responseText) {
+          const result = await chat.sendMessage(userMessage);
+          const response = await result.response;
+          responseText = response.text();
+        }
+
+        // Chuyển markdown sang plain text
+        responseText = convertMarkdownToPlainText(responseText);
+
+        const formattedResponse = responseText
+          .split('\n')
+          .filter(line => line.trim())
+          .map(line => `<p>${line}</p>`)
+          .join('');
+
+        document.getElementById("chatbox").innerHTML += `
+          <div class="message bot-message">
+            <p><strong>Bot:</strong></p>
+            ${formattedResponse}
+          </div>
+        `;
+        document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+        await saveDataToGoogleSheet([userMessage, responseText]);
+      });
+
+      // Add voice input functionality
+      const micButton = document.getElementById('micButton');
+      let isRecording = false;
+      
+      if ('webkitSpeechRecognition' in window) {
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = 'vi-VN';
+        recognition.continuous = false;
+        
+        micButton.addEventListener('click', () => {
+          if (!isRecording) {
+            recognition.start();
+            micButton.classList.add('recording');
+          } else {
+            recognition.stop();
+            micButton.classList.remove('recording');
+          }
+          isRecording = !isRecording;
+        });
+
+        recognition.onresult = (event) => {
+          const speechResult = event.results[0][0].transcript;
+          document.getElementById('userMessage').value = speechResult;
+          micButton.classList.remove('recording');
+          isRecording = false;
+        };
+
+        recognition.onerror = () => {
+          micButton.classList.remove('recording');
+          isRecording = false;
+        };
+      } else {
+        micButton.style.display = 'none';
+      }
+
+      // Add clear chat functionality
+      document.getElementById('clearChat').addEventListener('click', () => {
+        document.getElementById('chatbox').innerHTML = welcomeMessage;
+      });
+    }
+
+    setupChat();
+
+    // Giả lập chức năng tra cứu
+    document.getElementById("search").addEventListener("click", () => {
+      const query = document.getElementById("searchQuery").value;
+      const dropdown = document.getElementById("searchDropdown");
+      
+      if (query.trim()) {
+        dropdown.innerHTML = `
+          <p><strong>Kết quả tìm kiếm cho:</strong> "${query}"</p>
+          <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank">
+            <i class="fas fa-external-link-alt"></i> Xem trên Google
+          </a>
+        `;
+        dropdown.classList.add('active');
+      } else {
+        dropdown.innerHTML = `<p>Vui lòng nhập từ khóa.</p>`;
+        dropdown.classList.add('active');
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById("searchDropdown");
+      const searchContainer = document.querySelector('.nav-search');
+      if (!searchContainer.contains(e.target)) {
+        dropdown.classList.remove('active');
+      }
+    });
+  </script>
+
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</body>
+</html>

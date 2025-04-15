@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HỒ SƠ AI</title>
+    <style>
+        /* Reset và thiết lập cơ bản */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+
+        /* Layout chính */
+        .column {
+            padding: 20px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .left-column {
+            flex: 0 0 30%;
+            background-color: #1e293b;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .right-column {
+            flex: 1;
+            background-color: #0f172a;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Tiêu đề */
+        h2, h3 {
+            color: #f8fafc;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #334155;
+            font-weight: 500;
+        }
+
+        /* Chat container */
+        #chat-container {
+            flex: 1;
+            border-radius: 12px;
+            overflow-y: auto;
+            background-color: #1e293b;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 #1e293b;
+        }
+
+        #chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chat-container::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        #chat-container::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 10px;
+        }
+
+        /* Input field */
+        #user-input {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: #334155;
+            color: #f8fafc;
+            margin-top: 16px;
+            outline: none;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        #user-input:focus {
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
+        }
+
+        #user-input::placeholder {
+            color: #94a3b8;
+        }
+
+        /* File input styling */
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px;
+            background-color: #334155;
+            color: #f8fafc;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 1px dashed #475569;
+        }
+
+        .file-input-label:hover {
+            background-color: #475569;
+        }
+
+        .file-input-icon {
+            width: 24px;
+            height: 24px;
+            fill: #f8fafc;
+        }
+
+        #file-input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            background-color: #3b82f6;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background-color: #64748b;
+            color: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #send-button {
+            background-color: #10b981;
+        }
+
+        #send-button:hover:not(:disabled) {
+            background-color: #059669;
+        }
+
+        #delete-button {
+            background-color: #ef4444;
+        }
+
+        #delete-button:hover:not(:disabled) {
+            background-color: #dc2626;
+        }
+
+        #download-note-button {
+            background-color: #8b5cf6;
+        }
+
+        #download-note-button:hover {
+            background-color: #7c3aed;
+        }
+
+        /* Messages */
+        .message {
+            margin: 12px 0;
+            padding: 14px 16px;
+            border-radius: 12px;
+            animation: fadeIn 0.3s ease;
+            position: relative;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background-color: #3b82f6;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message {
+            background-color: #334155;
+            color: #f8fafc;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Image Preview */
+        #image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            justify-content: flex-start;
+        }
+
+        .image-preview-wrapper {
+            position: relative;
+            width: calc(50% - 6px);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .image-preview-wrapper:hover {
+            transform: scale(1.02);
+        }
+
+        .image-preview {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+            object-fit: cover;
+            aspect-ratio: 4/3;
+        }
+
+        .message .image-preview {
+            margin-top: 10px;
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 8px;
+        }
+
+        /* Text Area */
+        #note-area {
+            width: 100%;
+            height: 300px;
+            padding: 14px;
+            margin-top: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #334155;
+            color: #f8fafc;
+            resize: none;
+            outline: none;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        #note-area:focus {
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+        }
+
+        #note-area::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Loading indicator */
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading span {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            margin: 0 5px;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .loading span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* Icons */
+        .icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .left-column, .right-column {
+                flex: none;
+                width: 100%;
+                max-height: none;
+            }
+
+            .left-column {
+                order: 2;
+            }
+
+            .right-column {
+                order: 1;
+                height: 60vh;
+            }
+
+            #chat-container {
+                height: 65%;
+            }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #1e293b;
+            color: #f8fafc;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="column left-column">
+        <h2>TÀI NGUYÊN LƯU TRỮ</h2>
+        
+        <div class="file-input-wrapper">
+            <label for="file-input" class="file-input-label">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                </svg>
+                Tải lên hình ảnh CV
+            </label>
+            <input type="file" id="file-input" accept="image/*" multiple>
+        </div>
+        
+        <div id="image-preview-container"></div>
+        
+        <div class="button-group">
+            <button id="send-button" disabled>
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+                Gửi CV
+            </button>
+            <button id="delete-button" disabled>
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+                Xóa
+            </button>
+        </div>
+        
+        <h3>Ghi chú</h3>
+        <textarea id="note-area" placeholder="Ghi chú các thí sinh bạn muốn chọn..."></textarea>
+        <button id="download-note-button">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+            </svg>
+            Tải ghi chú
+        </button>
+    </div>
+    
+    <div class="column right-column">
+        <h2>Chatbot Tuyển Dụng</h2>
+        <div id="chat-container">
+            <div class="message ai-message">
+                Xin chào! Tôi là Trợ lý AI Tuyển dụng. Hãy tải lên CV của các ứng viên và tôi sẽ giúp bạn phân tích, so sánh để lựa chọn người phù hợp nhất.
+            </div>
+        </div>
+        
+        <div class="loading" id="loading-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        
+        <input type="text" id="user-input" placeholder="Nhập câu hỏi về ứng viên...">
+    </div>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+      }
+    </script>
+    <script type="module">
+      import { GoogleGenerativeAI } from "@google/generative-ai";
+
+      // Khởi tạo API
+      const API_KEY = "AIzaSyD62h1FrHPtaaQiChDcVwe5GxpDsNx0m6Q";
+      const genAI = new GoogleGenerativeAI(API_KEY);
+      const model = genAI.getGenerativeModel({
+          model: "gemini-1.5-flash",
+          systemInstruction: "Bạn là 1 AI giúp nhà tuyển dụng chọn lọc hồ sơ và tìm kiếm ứng viên phù hợp. Lưu ý: Chỉ phản hồi dạng văn bản, không bao giờ phản hồi ký tự đặc biệt như # *-."
+      });
+      
+      // Lấy DOM elements
+      const chatContainer = document.getElementById('chat-container');
+      const userInput = document.getElementById('user-input');
+      const fileInputEl = document.getElementById('file-input');
+      const sendButton = document.getElementById('send-button');
+      const deleteButton = document.getElementById('delete-button');
+      const imagePreviewContainer = document.getElementById('image-preview-container');
+      const noteArea = document.getElementById('note-area');
+      const loadingIndicator = document.getElementById('loading-indicator');
+
+      // Biến toàn cục
+      let selectedImages = [];
+      let messageHistory = [];
+
+      // Hàm thêm tin nhắn vào khung chat với animation
+      function addMessage(content, type, images = []) {
+          const messageDiv = document.createElement('div');
+          messageDiv.className = `message ${type}-message`;
+          messageDiv.style.opacity = "0";
+          messageDiv.style.transform = "translateY(8px)";
+          
+          // Thêm nội dung tin nhắn
+          const textNode = document.createElement('span');
+          textNode.textContent = content;
+          messageDiv.appendChild(textNode);
+
+          // Thêm hình ảnh nếu có
+          images.forEach(image => {
+              const img = document.createElement('img');
+              img.src = image;
+              img.className = 'image-preview';
+              messageDiv.appendChild(img);
+          });
+
+          chatContainer.appendChild(messageDiv);
+          
+          // Trigger animation
+          setTimeout(() => {
+              messageDiv.style.opacity = "1";
+              messageDiv.style.transform = "translateY(0)";
+          }, 10);
+          
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      // Hàm xử lý hình ảnh tải lên với hiệu ứng
+      fileInputEl.addEventListener('change', (event) => {
+          const files = event.target.files;
+          if (files.length === 0) return;
+          
+          selectedImages = [...files];
+          imagePreviewContainer.innerHTML = '';
+
+          // Hiển thị hình ảnh đã chọn với card style
+          for (const file of selectedImages) {
+              const wrapper = document.createElement('div');
+              wrapper.className = 'image-preview-wrapper';
+              
+              const img = document.createElement('img');
+              img.src = URL.createObjectURL(file);
+              img.className = 'image-preview';
+              img.alt = file.name;
+              
+              wrapper.appendChild(img);
+              imagePreviewContainer.appendChild(wrapper);
+              
+              // Hiệu ứng xuất hiện
+              wrapper.style.opacity = "0";
+              wrapper.style.transform = "translateY(10px)";
+              setTimeout(() => {
+                  wrapper.style.opacity = "1";
+                  wrapper.style.transform = "translateY(0)";
+              }, 50 * imagePreviewContainer.children.length);
+          }
+
+          sendButton.disabled = selectedImages.length === 0;
+          deleteButton.disabled = selectedImages.length === 0;
+          
+          // Thông báo khi tải lên thành công
+          const notification = document.createElement('div');
+          notification.textContent = `Đã tải lên ${selectedImages.length} hình ảnh`;
+          notification.style.color = "#10b981";
+          notification.style.textAlign = "center";
+          notification.style.padding = "10px";
+          notification.style.marginTop = "10px";
+          notification.style.borderRadius = "8px";
+          notification.style.backgroundColor = "rgba(16, 185, 129, 0.1)";
+          notification.style.animation = "fadeIn 0.3s ease";
+          imagePreviewContainer.appendChild(notification);
+          
+          setTimeout(() => {
+              notification.style.opacity = "0";
+              setTimeout(() => notification.remove(), 300);
+          }, 3000);
+      });
+
+      // Hàm gửi ảnh lên cho chatbot
+      sendButton.addEventListener('click', async () => {
+          if (selectedImages.length > 0) {
+              loadingIndicator.style.display = "block"; // Hiển thị chỉ báo đang tải
+              
+              const prompt = "Hãy phân tích và so sánh hai CV này và cho biết tôi nên chọn ai?";
+              addMessage(prompt, 'user', selectedImages.map(file => URL.createObjectURL(file)));
+
+              try {
+                  const imageParts = await Promise.all(selectedImages.map(fileToGenerativePart));
+                  const result = await model.generateContent([prompt, ...imageParts]);
+                  const response = await result.response;
+                  const text = await response.text();
+
+                  loadingIndicator.style.display = "none"; // Ẩn chỉ báo đang tải
+                  addMessage(text, 'ai');
+
+                  // Lưu lịch sử trò chuyện
+                  messageHistory.push({ user: prompt, ai: text });
+
+                  // Xóa hình ảnh đã gửi và cập nhật trạng thái nút
+                  imagePreviewContainer.innerHTML = '';
+                  selectedImages = [];
+                  sendButton.disabled = true;
+                  deleteButton.disabled = true;
+                  
+                  // Chuyển focus đến ô nhập văn bản
+                  userInput.focus();
+              } catch (error) {
+                  console.error("Error generating response:", error);
+                  loadingIndicator.style.display = "none";
+                  addMessage("Đã xảy ra lỗi khi phân tích CV. Vui lòng thử lại.", 'ai');
+              }
+          }
+      });
+
+      // Hàm xóa hình ảnh đã chọn với animation
+      deleteButton.addEventListener('click', () => {
+          // Animation xóa từng hình
+          const items = imagePreviewContainer.children;
+          let delay = 0;
+          
+          for (let i = items.length - 1; i >= 0; i--) {
+              const item = items[i];
+              setTimeout(() => {
+                  item.style.opacity = "0";
+                  item.style.transform = "translateY(10px)";
+              }, delay);
+              delay += 100;
+          }
+          
+          // Xóa DOM sau khi animation hoàn tất
+          setTimeout(() => {
+              imagePreviewContainer.innerHTML = '';
+              selectedImages = [];
+              sendButton.disabled = true;
+              deleteButton.disabled = true;
+          }, delay + 200);
+      });
+
+      // Hàm chuyển đổi File thành GenerativeAI.Part
+      async function fileToGenerativePart(file) {
+          const base64EncodedDataPromise = new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result.split(',')[1]);
+              reader.readAsDataURL(file);
+          });
+          return {
+              inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
+          };
+      }
+      
+      // Hàm xử lý khi người dùng gửi tin nhắn văn bản
+      userInput.addEventListener('keypress', async (event) => {
+          if (event.key === 'Enter') {
+              const userMessage = userInput.value.trim();
+              if (userMessage === '') return;
+              
+              addMessage(userMessage, 'user');
+              userInput.value = '';
+              loadingIndicator.style.display = "block";
+              
+              try {
+                  // Tạo prompt từ lịch sử trò chuyện
+                  const context = messageHistory.map(msg => `User: ${msg.user}\nAI: ${msg.ai}`).join('\n');
+                  const prompt = `${context}\nUser: ${userMessage}\nAI:`;
+                  
+                  // Gửi yêu cầu tới mô hình AI
+                  const result = await model.generateContent([prompt]);
+                  const response = await result.response;
+                  const text = await response.text();
+                  
+                  loadingIndicator.style.display = "none";
+                  addMessage(text, 'ai');
+                  
+                  // Lưu lịch sử trò chuyện
+                  messageHistory.push({ user: userMessage, ai: text });
+              } catch (error) {
+                  console.error("Error generating response:", error);
+                  loadingIndicator.style.display = "none";
+                  addMessage("Đã xảy ra lỗi. Vui lòng thử lại.", 'ai');
+              }
+          }
+      });
+      
+      // Hàm tải xuống ghi chú với hiệu ứng
+      document.getElementById('download-note-button').addEventListener('click', function() {
+          // Lấy nội dung từ vùng ghi chú
+          const noteContent = noteArea.value;
+          
+          if (noteContent.trim() === '') {
+              // Thông báo nếu không có nội dung
+              const notification = document.createElement('div');
+              notification.textContent = "Vui lòng nhập nội dung trước khi tải xuống";
+              notification.style.color = "#ef4444";
+              notification.style.textAlign = "center";
+              notification.style.padding = "10px";
+              notification.style.marginTop = "10px";
+              notification.style.borderRadius = "8px";
+              notification.style.backgroundColor = "rgba(239, 68, 68, 0.1)";
+              notification.style.animation = "fadeIn 0.3s ease";
+              
+              noteArea.parentNode.insertBefore(notification, document.getElementById('download-note-button').nextSibling);
+              
+              setTimeout(() => {
+                  notification.style.opacity = "0";
+                  setTimeout(() => notification.remove(), 300);
+              }, 3000);
+              
+              return;
+          }
+          
+          // Tạo file văn bản
+          const blob = new Blob([noteContent], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          
+          // Tạo thẻ a để tải file
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'ghi_chu_ung_vien.txt';
+          document.body.appendChild(link);
+          link.click();
+          
+          // Xóa thẻ và url blob sau khi tải xong
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          
+          // Hiệu ứng thành công
+          const notification = document.createElement('div');
+          notification.textContent = "Đã tải xuống ghi chú thành công!";
+          notification.style.color = "#10b981";
+          notification.style.textAlign = "center";
+          notification.style.padding = "10px";
+          notification.style.marginTop = "10px";
+          notification.style.borderRadius = "8px";
+          notification.style.backgroundColor = "rgba(16, 185, 129, 0.1)";
+          notification.style.animation = "fadeIn 0.3s ease";
+          
+          noteArea.parentNode.insertBefore(notification, document.getElementById('download-note-button').nextSibling);
+          
+          setTimeout(() => {
+              notification.style.opacity = "0";
+              setTimeout(() => notification.remove(), 300);
+          }, 3000);
+      });
+      
+      // Tự động focus vào ô nhập văn bản khi trang tải xong
+      window.addEventListener('load', () => {
+          userInput.focus();
+      });
+    </script>
+</body>
+</html>

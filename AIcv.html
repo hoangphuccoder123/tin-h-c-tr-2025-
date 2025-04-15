@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV Chatbot</title>
+  <style>
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Dark Theme */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      background-color: #121212;
+      padding: 20px;
+      color: #e0e0e0;
+    }
+
+    /* Container for Chatbot and Form */
+    .container {
+      display: flex;
+      width: 100%;
+      max-width: 1200px;
+      gap: 20px;
+    }
+
+    /* Chatbot Container */
+    .chatbot-container {
+      background-color: #1e1e1e;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      width: 60%;
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    /* Form Container */
+    .form-container {
+      background-color: #1e1e1e;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      width: 40%;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    /* Headings */
+    h2 {
+      color: #fff;
+      margin-bottom: 20px;
+      font-weight: 500;
+      font-size: 24px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+    }
+
+    /* Chat History Styling */
+    .chat-history {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding-right: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: #555 #1e1e1e;
+    }
+
+    .chat-history::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-history::-webkit-scrollbar-track {
+      background: #1e1e1e;
+    }
+
+    .chat-history::-webkit-scrollbar-thumb {
+      background-color: #555;
+      border-radius: 10px;
+    }
+
+    .message {
+      margin-bottom: 15px;
+      padding: 14px;
+      border-radius: 12px;
+      line-height: 1.5;
+      max-width: 80%;
+      position: relative;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .user-message {
+      background-color: #4a5568;
+      color: #fff;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bot-message {
+      background-color: #2d3748;
+      color: #fff;
+      margin-right: auto;
+      border-bottom-left-radius: 4px;
+    }
+
+    /* Input and Button Styling */
+    .input-area {
+      background-color: #2d3748;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .input-container {
+      display: flex;
+      gap: 12px;
+      position: relative;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      background-color: #3a4655;
+      color: #fff;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+    }
+
+    input[type="text"]::placeholder {
+      color: #a0aec0;
+    }
+
+    .file-input-container {
+      position: relative;
+    }
+
+    .file-input-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      background-color: #3a4655;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .file-input-label:hover {
+      background-color: #4a5568;
+    }
+
+    .file-input-icon {
+      width: 20px;
+      height: 20px;
+      fill: #a0aec0;
+    }
+
+    input[type="file"] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    .send-btn {
+      background-color: #4299e1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .send-btn:hover {
+      background-color: #3182ce;
+      transform: translateY(-2px);
+    }
+
+    .send-icon {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #a0aec0;
+      font-size: 14px;
+    }
+
+    .form-group input[type="text"] {
+      width: 100%;
+      background-color: #2d3748;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background-color: #4299e1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+      background-color: #3182ce;
+      transform: translateY(-2px);
+    }
+
+    /* File name display */
+    .file-name {
+      font-size: 12px;
+      color: #a0aec0;
+      margin-top: 8px;
+      text-align: center;
+      display: none;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .chatbot-container, .form-container {
+        width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+      }
+      .chatbot-container {
+        height: 70vh;
+      }
+    }
+
+    /* Loading indicator */
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .loading span {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #4299e1;
+      margin: 0 5px;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .loading span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+    
+    .loading span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(0);
+      }
+      40% {
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="chatbot-container">
+      <h2>CV Chatbot</h2>
+      <div class="chat-history" id="chatHistory">
+        <div class="message bot-message">
+          Xin chào! Tôi là CV Assistant, hãy gửi nội dung hoặc ảnh CV của bạn để tôi có thể tư vấn giúp bạn.
+        </div>
+      </div>
+      
+      <div class="loading" id="loadingIndicator">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      
+      <div class="input-area">
+        <div class="input-container">
+          <input type="text" id="userInput" placeholder="Hỏi về CV hoặc tải lên ảnh CV...">
+          
+          <div class="file-input-container">
+            <label for="fileInput" class="file-input-label">
+              <svg class="file-input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
+              </svg>
+            </label>
+            <input type="file" id="fileInput" accept="image/*">
+          </div>
+          
+          <button class="send-btn" id="sendBtn">
+            <svg class="send-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+            </svg>
+          </button>
+        </div>
+        <div class="file-name" id="fileName"></div>
+      </div>
+    </div>
+
+    <div class="form-container">
+      <h2>Gửi Nội Dung</h2>
+      <form id="contentForm" action="https://example.com/submit" method="POST">
+        <div class="form-group">
+          <label for="fullName">Họ và tên</label>
+          <input type="text" id="fullName" name="fullName" required>
+        </div>
+        <div class="form-group">
+          <label for="contact">Liên hệ</label>
+          <input type="text" id="contact" name="contact" required>
+        </div>
+        <div class="form-group">
+          <label for="cvLink">Link CV</label>
+          <input type="text" id="cvLink" name="cvLink" required>
+        </div>
+        <div class="form-group">
+          <label for="company">Công ty muốn ứng tuyển</label>
+          <input type="text" id="company" name="company" required>
+        </div>
+        <button type="submit" class="submit-btn">Gửi</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Import Google Generative AI -->
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import { GoogleGenerativeAI } from "@google/generative-ai";
+
+    // Replace with your actual API Key securely
+    const API_KEY = "AIzaSyD62h1FrHPtaaQiChDcVwe5GxpDsNx0m6Q";
+    const genAI = new GoogleGenerativeAI(API_KEY);
+
+    const chatHistory = document.getElementById("chatHistory");
+    const userInput = document.getElementById("userInput");
+    const fileInput = document.getElementById("fileInput");
+    const fileName = document.getElementById("fileName");
+    const sendBtn = document.getElementById("sendBtn");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+
+    // Display file name when a file is selected
+    fileInput.addEventListener("change", function() {
+      if (this.files && this.files[0]) {
+        fileName.textContent = this.files[0].name;
+        fileName.style.display = "block";
+      } else {
+        fileName.style.display = "none";
+      }
+    });
+
+    // Helper function to add messages to the chat history with animation
+    function addMessage(text, isUser = false) {
+      const message = document.createElement("div");
+      message.classList.add("message", isUser ? "user-message" : "bot-message");
+      message.textContent = text;
+      message.style.opacity = "0";
+      message.style.transform = "translateY(10px)";
+      
+      chatHistory.appendChild(message);
+      
+      // Trigger animation
+      setTimeout(() => {
+        message.style.opacity = "1";
+        message.style.transform = "translateY(0)";
+      }, 10);
+      
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    async function getCVFeedback(inputText, imagePart = null) {
+      loadingIndicator.style.display = "block"; // Show loading indicator
+      
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const prompt = `Trả lời bằng tiếng Việt: Tư vấn hoặc góp ý về CV cho nội dung: ${inputText}`;
+
+      const inputs = imagePart ? [prompt, imagePart] : [prompt];
+
+      try {
+        const result = await model.generateContent(inputs);
+        const response = await result.response;
+        const botReply = await response.text();
+
+        loadingIndicator.style.display = "none"; // Hide loading indicator
+        addMessage(botReply, false); // Display bot response in chat
+      } catch (error) {
+        console.error("Error generating chatbot response:", error);
+        loadingIndicator.style.display = "none"; // Hide loading indicator
+        addMessage("Có lỗi xảy ra. Vui lòng thử lại.", false);
+      }
+    }
+
+    // Function to convert uploaded file to GoogleGenerativeAI.Part format
+    async function fileToGenerativePart(file) {
+      const base64EncodedDataPromise = new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.readAsDataURL(file);
+      });
+      return {
+        inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
+      };
+    }
+
+    // Event listener for Send button
+    sendBtn.addEventListener("click", async () => {
+      const userText = userInput.value.trim();
+      const file = fileInput.files[0];
+      let imagePart = null;
+
+      if (file) {
+        imagePart = await fileToGenerativePart(file); // Convert image to AI-compatible format
+      }
+
+      if (userText || imagePart) {
+        addMessage(userText || "Đã gửi hình ảnh để phân tích", true);  // Display user message
+        userInput.value = "";  // Clear text input
+        fileInput.value = "";  // Clear file input
+        fileName.style.display = "none"; // Hide file name display
+
+        getCVFeedback(userText, imagePart);  // Get AI feedback for text and/or image
+      } else {
+        // Gentle notification instead of alert
+        const notification = document.createElement("div");
+        notification.textContent = "Vui lòng nhập văn bản hoặc tải lên hình ảnh.";
+        notification.style.color = "#f56565";
+        notification.style.textAlign = "center";
+        notification.style.padding = "8px";
+        notification.style.marginTop = "8px";
+        notification.style.borderRadius = "4px";
+        notification.style.backgroundColor = "rgba(252, 129, 129, 0.1)";
+        document.querySelector(".input-area").appendChild(notification);
+        
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      }
+    });
+
+    // Allow "Enter" key to send messages
+    userInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        sendBtn.click();
+      }
+    });
+    
+    // Form submission handler
+    document.getElementById("contentForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        fullName: document.getElementById("fullName").value,
+        contact: document.getElementById("contact").value,
+        cvLink: document.getElementById("cvLink").value,
+        company: document.getElementById("company").value
+      };
+      
+      // Display confirmation with animation
+      const confirmation = document.createElement("div");
+      confirmation.textContent = "Đã gửi thông tin thành công!";
+      confirmation.style.color = "#48bb78";
+      confirmation.style.textAlign = "center";
+      confirmation.style.padding = "12px";
+      confirmation.style.marginTop = "16px";
+      confirmation.style.borderRadius = "4px";
+      confirmation.style.backgroundColor = "rgba(72, 187, 120, 0.1)";
+      confirmation.style.opacity = "0";
+      confirmation.style.transform = "translateY(10px)";
+      this.appendChild(confirmation);
+      
+      setTimeout(() => {
+        confirmation.style.opacity = "1";
+        confirmation.style.transform = "translateY(0)";
+      }, 10);
+      
+      setTimeout(() => {
+        confirmation.style.opacity = "0";
+        confirmation.style.transform = "translateY(10px)";
+        setTimeout(() => confirmation.remove(), 300);
+      }, 3000);
+      
+      this.reset();
+      
+      // Here you would normally send the data to your server
+      console.log("Form data:", formData);
+    });
+  </script>
+</body>
+</html> 

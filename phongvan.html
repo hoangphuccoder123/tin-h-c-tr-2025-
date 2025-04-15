@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phòng phỏng vấn ảo</title>
+  <style>
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+
+    /* Dark Mode Body Style */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Left Column for Notes */
+    #notes {
+      width: 350px;
+      background: #1e1e1e;
+      padding: 15px;
+      overflow-y: auto;
+      border-right: 1px solid #333;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    h3 {
+      margin-bottom: 10px;
+      color: #f0f0f0;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    #note-input {
+      flex-grow: 1;
+      margin-bottom: 10px;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 10px;
+      resize: none;
+      font-size: 14px;
+      background: #2d2d2d;
+      color: #e0e0e0;
+    }
+
+    #export-button {
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      background: #ff9800;
+      color: #121212;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    #export-button:hover {
+      background: #ffb74d;
+      transform: translateY(-2px);
+    }
+
+    /* Chat Container */
+    #chat-container {
+      flex: 1;
+      height: 100%;
+      padding: 15px;
+      background: #1a1a1a;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Chat Output */
+    #chat-output {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 15px;
+      background: #242424;
+      margin-bottom: 15px;
+      scrollbar-width: thin;
+      scrollbar-color: #555 #242424;
+    }
+
+    #chat-output::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #chat-output::-webkit-scrollbar-thumb {
+      background-color: #555;
+      border-radius: 6px;
+    }
+
+    /* Chat Input and Buttons */
+    .input-area {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    #chat-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background: #2d2d2d;
+      color: #e0e0e0;
+      height: 40px;
+    }
+
+    .button-group {
+      display: flex;
+      margin-left: 10px;
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      background: #ff9800;
+      color: #121212;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 5px;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #ffb74d;
+      transform: translateY(-2px);
+    }
+
+    button .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    /* Chat Messages */
+    #chat-output p {
+      margin: 8px 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      max-width: 85%;
+      word-wrap: break-word;
+    }
+
+    #chat-output p.user-message {
+      margin-left: auto;
+      background: #ff9800;
+      color: #121212;
+      border-bottom-right-radius: 0;
+    }
+
+    #chat-output p.ai-message {
+      margin-right: auto;
+      background: #424242;
+      color: #f0f0f0;
+      border-bottom-left-radius: 0;
+    }
+
+    /* Speech rate control */
+    #speech-control {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+    }
+
+    #speech-control label {
+      margin-right: 5px;
+      color: #e0e0e0;
+    }
+
+    #speech-rate {
+      width: 80px;
+      accent-color: #ff9800;
+    }
+
+    #rate-display {
+      min-width: 25px;
+      color: #e0e0e0;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    #language-select {
+      margin-left: 10px;
+      padding: 5px;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background: #2d2d2d;
+      color: #e0e0e0;
+    }
+  </style>
+  <!-- AI & Machine Learning Libraries -->
+  <!-- TensorFlow.js - Core framework for machine learning in browser -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <!-- TensorFlow.js models - Pre-trained models -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection@latest"></script>
+  <!-- ml5.js - Friendly high-level interface to TensorFlow.js -->
+  <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+  <!-- brain.js - Neural networks in JavaScript -->
+  <script src="https://unpkg.com/brain.js"></script>
+  <!-- Synaptic - Architecture-free neural network library -->
+  <script src="https://cdn.jsdelivr.net/npm/synaptic@1.1.4/dist/synaptic.min.js"></script>
+  <!-- OpenCV.js - Computer vision library -->
+  <script async src="https://docs.opencv.org/master/opencv.js" type="text/javascript"></script>
+  <!-- ConvNetJS - Deep Learning in browser -->
+  <script src="https://cdn.jsdelivr.net/npm/convnetjs@latest/build/convnet.js"></script>
+  <!-- Transformers.js - Run Hugging Face models directly in the browser -->
+  <script src="https://cdn.jsdelivr.net/npm/@huggingface/inference@latest"></script>
+  <!-- Natural - Natural language processing -->
+  <script src="https://unpkg.com/natural@latest/dist/natural.min.js"></script>
+  <!-- Already included libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/machinelearning/dist/machinelearning.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/deeplearning/dist/deeplearning.min.js"></script>
+  <script src="/data AI/phòng phỏng vân ảo/data tổng 1.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="notes">
+    <h3>Ghi Chú</h3>
+    <textarea id="note-input" placeholder="Ghi chú của bạn ở đây..."></textarea>
+    <button id="export-button">Xuất Ghi Chú</button>
+  </div>
+  
+  <div id="chat-container">
+    <h3>PHỎNG VẤN TECHJOB AI</h3>
+    <div id="chat-output"></div>
+    
+    <div class="input-area">
+      <input type="text" id="chat-input" placeholder="Nhập tin nhắn tới TechFuture AI..." />
+      
+      <div class="button-group">
+        <button id="send-button" title="Gửi"><span class="material-symbols-outlined">send</span></button>
+        <button id="speech-button" title="Nói"><span class="material-symbols-outlined">mic</span></button>
+        <button id="clear-button" title="Xóa chat">Clear</button>
+      </div>
+      
+      <div id="speech-control">
+        <label for="speech-rate" title="Tốc độ nói"><span class="material-symbols-outlined">speed</span></label>
+        <input type="range" id="speech-rate" min="0.5" max="2.0" step="0.1" value="1">
+        <span id="rate-display">1.0</span>
+        <select id="language-select">
+          <option value="vi-VN">Tiếng Việt</option>
+          <option value="en-US">English</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    import { GoogleGenerativeAI } from "@google/generative-ai";
+
+    const API_KEY = "AIzaSyBu9qXzymzcblC_kTx3Cpbr1bNENt-rbqo"; 
+    const genAI = new GoogleGenerativeAI(API_KEY);
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: "You are an interview AI assistant. Please respond in the same language as the user's input (Vietnamese or English). For Vietnamese: Support interview practice and provide feedback. For English: Help with interview preparation and give feedback.",
+      prompt: "If asked about IT fields like AI, software, network administration, provide relevant questions in the user's language.",
+    });
+
+    const generationConfig = {
+      temperature: 1,
+      topP: 0.95,
+      topK: 64,
+      maxOutputTokens: 8192,
+      responseMimeType: "text/plain",
+    };
+
+    const langConfig = {
+      'vi-VN': {
+        speed: 2.0,
+        welcomeMessage: "Chào mừng bạn đến với Phòng phỏng vấn ảo! Hãy cho tôi biết bạn muốn ứng tuyển vị trí nào.",
+        thinkingMessage: "AI đang suy nghĩ...",
+        errorMessage: "Có lỗi xảy ra. Vui lòng thử lại."
+      },
+      'en-US': {
+        speed: 2.0, // Increase English speed
+        welcomeMessage: "Welcome! Which position are you applying for?",
+        thinkingMessage: "Processing...",
+        errorMessage: "Error. Try again."
+      }
+    };
+
+    // Update rate display
+    const rateSlider = document.getElementById('speech-rate');
+    const rateDisplay = document.getElementById('rate-display');
+    
+    rateSlider.addEventListener('input', () => {
+      rateDisplay.textContent = parseFloat(rateSlider.value).toFixed(1);
+    });
+    
+    // Initialize rate display
+    rateDisplay.textContent = parseFloat(rateSlider.value).toFixed(1);
+
+    // Add queue management for speech
+    const speechQueue = {
+      speaking: false,
+      cancel() {
+        speechSynthesis.cancel();
+        this.speaking = false;
+        toggleUIState(false);
+      }
+    };
+
+    // Add UI state toggle function
+    function toggleUIState(disabled) {
+      const chatInput = document.getElementById('chat-input');
+      const sendButton = document.getElementById('send-button');
+      const speechButton = document.getElementById('speech-button');
+      
+      chatInput.disabled = disabled;
+      sendButton.disabled = disabled;
+      speechButton.disabled = disabled;
+      
+      if (disabled) {
+        chatInput.style.opacity = '0.6';
+        sendButton.style.opacity = '0.6';
+        speechButton.style.opacity = '0.6';
+        chatInput.placeholder = 'Đang phát âm thanh...';
+      } else {
+        chatInput.style.opacity = '1';
+        sendButton.style.opacity = '1';
+        speechButton.style.opacity = '1';
+        chatInput.placeholder = 'Nhập tin nhắn tới TechFuture AI...';
+      }
+    }
+
+    // Hàm chuyển văn bản thành âm thanh
+    function textToSpeech(text) {
+      // Chuyển markdown sang plain text trước khi đọc
+      text = convertMarkdownToPlainText(text);
+      speechQueue.cancel();
+      toggleUIState(true); // Disable UI when speech starts
+      
+      const synth = window.speechSynthesis;
+      const selectedLang = document.getElementById('language-select').value;
+
+      // Split English text into smaller segments at punctuation
+      if (selectedLang === 'en-US') {
+        const segments = text.match(/[^.!?]+[.!?]+/g) || [text];
+        segments.forEach(segment => {
+          const utterance = new SpeechSynthesisUtterance(segment.trim());
+          configureUtterance(utterance, selectedLang);
+        });
+      } else {
+        const utterance = new SpeechSynthesisUtterance(text);
+        configureUtterance(utterance, selectedLang);
+      }
+    }
+
+    // Hàm loại bỏ ký tự markdown ** và *
+    function convertMarkdownToPlainText(text) {
+      return text.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1');
+    }
+
+    function configureUtterance(utterance, lang) {
+      const synth = window.speechSynthesis;
+      const voices = synth.getVoices();
+      
+      if (lang === 'vi-VN') {
+        const msVietnameseVoice = voices.find(voice => 
+          voice.name.includes('Microsoft') && voice.lang === 'vi-VN'
+        );
+        const vietnameseVoice = voices.find(voice => voice.lang === 'vi-VN');
+        utterance.voice = msVietnameseVoice || vietnameseVoice || null;
+      } else {
+        const msEnglishVoice = voices.find(voice =>
+          voice.name.includes('Microsoft') && voice.lang === 'en-US'
+        );
+        const englishVoice = voices.find(voice => voice.lang === 'en-US');
+        utterance.voice = msEnglishVoice || englishVoice || null;
+      }
+      
+      utterance.lang = lang;
+      utterance.rate = langConfig[lang].speed;
+      utterance.onend = () => {
+        speechQueue.speaking = false;
+        toggleUIState(false); // Re-enable UI when speech ends
+      };
+      
+      synth.speak(utterance);
+    }
+
+    // Hàm chuyển giọng nói thành văn bản
+    function startSpeechRecognition() {
+      const speechButton = document.getElementById('speech-button');
+      speechButton.style.background = '#e65100';
+      speechButton.innerHTML = '<span class="material-symbols-outlined">record_voice_over</span>';
+      
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = document.getElementById('language-select').value;
+      recognition.interimResults = false;
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('chat-input').value = transcript;
+        setTimeout(() => sendMessage(), 500);
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Recognition error: ', event.error);
+        resetSpeechButton();
+      };
+
+      recognition.onend = () => {
+        resetSpeechButton();
+      };
+      
+      function resetSpeechButton() {
+        speechButton.style.background = '#ff9800';
+        speechButton.innerHTML = '<span class="material-symbols-outlined">mic</span>';
+      }
+
+      recognition.start();
+    }
+
+    // Hàm thực thi để bắt đầu phiên trò chuyện
+    async function run(userMessage) {
+      const chatSession = model.startChat({
+        generationConfig,
+        history: [
+          { role: "user", parts: [{ text: "xin chào\n" }] },
+          { role: "model", parts: [{ text: "Xin chào bạn! Hãy cung cấp thông tin cá nhân và bắt đầu phỏng vấn." }] },
+          { role: "user", parts: [{ text: "Tôi là  , Tôi muốn ứng tuyển ." }] },
+          { role: "model", parts: [{ text: "Tuyệt vời! Hãy bắt đầu với câu hỏi đầu tiên." }] },
+          { role: "user", parts: [{ text: "Sẵn sàng phỏng vấn." }] },
+          { role: "model", parts: [{ text: "Câu hỏi đầu tiên là: " }] },
+          { role: "user", parts: [{ text: "Câu trả lời của người dùng " }] },
+          { role: "model", parts: [{ text: "Tuyệt, câu trả lời của bạn sẽ được nhận xét." }] },
+        ],
+      });
+
+      try {
+        const result = await chatSession.sendMessage(userMessage);
+        return result.response.text();
+      } catch (error) {
+        console.error('Error sending message:', error);
+        return "Có lỗi xảy ra khi xử lý yêu cầu của bạn. Vui lòng thử lại sau.";
+      }
+    }
+
+    async function sendMessage() {
+      const selectedLang = document.getElementById('language-select').value;
+      const chatInput = document.getElementById('chat-input');
+      const chatOutput = document.getElementById('chat-output');
+
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+
+      // Create and append user message
+      const userMessage = document.createElement('p');
+      userMessage.classList.add('user-message');
+      userMessage.textContent = msg;
+      chatOutput.appendChild(userMessage);
+      chatInput.value = '';
+
+      // Show thinking status
+      const thinkingMessage = document.createElement('p');
+      thinkingMessage.classList.add('ai-message');
+      thinkingMessage.textContent = langConfig[selectedLang].thinkingMessage;
+      chatOutput.appendChild(thinkingMessage);
+      chatOutput.scrollTop = chatOutput.scrollHeight;
+
+      // Get AI response
+      try {
+        const aiResponse = await run(msg);
+        chatOutput.removeChild(thinkingMessage);
+
+        // Create and append AI message
+        const aiMessage = document.createElement('p');
+        aiMessage.classList.add('ai-message');
+        aiMessage.textContent = aiResponse;
+        chatOutput.appendChild(aiMessage);
+        chatOutput.scrollTop = chatOutput.scrollHeight;
+
+        // Speak the AI response
+        textToSpeech(aiResponse);
+      } catch (error) {
+        chatOutput.removeChild(thinkingMessage);
+        const errorMessage = document.createElement('p');
+        errorMessage.classList.add('ai-message');
+        errorMessage.textContent = langConfig[selectedLang].errorMessage;
+        chatOutput.appendChild(errorMessage);
+        chatOutput.scrollTop = chatOutput.scrollHeight;
+      }
+    }
+
+    document.getElementById('send-button').addEventListener('click', sendMessage);
+    
+    document.getElementById('clear-button').addEventListener('click', () => {
+      speechQueue.cancel(); // Stop any ongoing speech
+      document.getElementById('chat-output').innerHTML = '';
+    });
+
+    document.getElementById('chat-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    document.getElementById('speech-button').addEventListener('click', startSpeechRecognition);
+
+    document.getElementById('export-button').addEventListener('click', () => {
+      const notes = document.getElementById('note-input').value;
+      const blob = new Blob([notes], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'ghi_chu_phong_van.txt';
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+
+    // Add event listener for language switching
+    document.getElementById('language-select').addEventListener('change', function() {
+      const selectedLang = this.value;
+      // Update recognition language
+      if (window.recognition) {
+        window.recognition.lang = selectedLang;
+      }
+      // Cancel any ongoing speech when switching languages
+      speechQueue.cancel();
+    });
+
+    // Hiển thị thông báo chào mừng
+    window.addEventListener('DOMContentLoaded', () => {
+      const selectedLang = document.getElementById('language-select').value;
+      const chatOutput = document.getElementById('chat-output');
+      const welcomeMessage = document.createElement('p');
+      welcomeMessage.classList.add('ai-message');
+      welcomeMessage.textContent = langConfig[selectedLang].welcomeMessage;
+      chatOutput.appendChild(welcomeMessage);
+    });
+  </script>
+</body>
+</html>
