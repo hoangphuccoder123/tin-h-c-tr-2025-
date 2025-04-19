@@ -569,7 +569,7 @@
     <div class="content">
       <!-- Cột Chatbot -->
       <div class="chat-column">
-        <h2>Chatbot Tư Vấn Nghề Nghiệp</h2>
+        <h2>AI hỗ trợ định hướng nghề nghiệp và tìm kiếm việc làm</h2>
         <div id="chatbox"></div>
         <div class="input-container">
           <button class="action-button" id="micButton" title="Bấm để nói">
@@ -604,7 +604,7 @@
         <div class="footer-section">
           <h3>Dịch vụ</h3>
           <ul>
-            <li><a href="#">Tư vấn hướng nghiệp bằng AI</a></li>
+            <li><a href="index.html">Tư vấn nghề nghiệp AI</a></li>
             <li><a href="AIcv.html">ChatBot CV tự động</a></li>
             <li><a href="phongvan.html">ChatBot phỏng vấn</a></li>
             <li><a href="hosoai.html">ChatBot tuyển dụng</a></li>
@@ -662,6 +662,84 @@
     const sheetId = '13s4nVD87Gk2xEkg_GsXcsbq7Q3IZx7f_nkQyvYKLgNk'; // ID Google Sheet chứa dữ liệu nghề nghiệp
     const range = 'html data'; // Tên sheet chứa dữ liệu
     const genAI = new GoogleGenerativeAI(API_KEY);
+
+    // Thêm biến lưu mode
+    let userMode = null;
+
+    // Hàm render chọn mode
+    function renderModeSelection() {
+      return `
+        <div class="message bot-message">
+          <p><strong>Bot:</strong> Xin chào! Bạn là:</p>
+          <ul>
+            <li><button id="mode-hocsinh" style="margin:4px 0;">👦 Học sinh cấp 3</button></li>
+            <li><button id="mode-sinhvien" style="margin:4px 0;">🎓 Sinh viên</button></li>
+          </ul>
+        </div>
+      `;
+    }
+
+    // Hàm render gợi ý theo mode
+    function renderWelcomeByMode(mode) {
+      if (mode === "hocsinh") {
+        return `
+          <div class="message bot-message">
+            <p><strong>Bot:</strong> Bạn đã chọn <b>Học sinh cấp 3</b>. Mình sẽ tư vấn hướng nghiệp theo mô hình Holland RIASEC.</p>
+            <p>Hãy chọn một chủ đề để bắt đầu:</p>
+            <ul>
+              <li>1️⃣ Khám phá kiểu tính cách Holland của bạn</li>
+              <li>2️⃣ Tìm hiểu về 6 nhóm tính cách RIASEC</li>
+              <li>3️⃣ Phân tích nghề nghiệp phù hợp với tính cách</li>
+              <li>4️⃣ Tư vấn lộ trình phát triển cụ thể</li>
+            </ul>
+            <p>Bạn hãy chọn số từ 1-4 hoặc đặt câu hỏi về bất kỳ chủ đề nào bạn quan tâm nhé!</p>
+          </div>
+        `;
+      } else if (mode === "sinhvien") {
+        return `
+          <div class="message bot-message">
+            <p><strong>Bot:</strong> Bạn đã chọn <b>Sinh viên</b>. Mình sẽ tư vấn về định hướng chuyên ngành, kỹ năng và nghề nghiệp phù hợp với sinh viên.</p>
+            <p>Hãy chọn một chủ đề để bắt đầu:</p>
+            <ul>
+              <li>
+                1️⃣ Chuyên ngành phù hợp với bản thân
+                <ul>
+                  <li>"Khám phá bản thân, chọn ngành nghề tạo dựng tương lai!"</li>
+                  <li>"Chuyên ngành đúng, nghề nghiệp thành công!"</li>
+                  <li>"Định hướng ngành học phù hợp, vững bước vào tương lai."</li>
+                </ul>
+              </li>
+              <li>
+                2️⃣ Kỹ năng cần thiết cho sinh viên ngành CNTT
+                <ul>
+                  <li>"Làm chủ công nghệ, xây dựng tương lai nghề nghiệp!"</li>
+                  <li>"Không chỉ học, mà còn làm được – Kỹ năng CNTT cho bạn!"</li>
+                  <li>"Cập nhật kỹ năng CNTT – Tạo bước đệm vững chắc cho nghề nghiệp."</li>
+                </ul>
+              </li>
+              <li>
+                3️⃣ Cơ hội nghề nghiệp sau khi tốt nghiệp
+                <ul>
+                  <li>"Chọn nghề đúng, sự nghiệp thăng hoa!"</li>
+                  <li>"Tốt nghiệp là khởi đầu cho một hành trình nghề nghiệp đầy tiềm năng!"</li>
+                  <li>"Chinh phục cơ hội nghề nghiệp, xây dựng tương lai sáng!"</li>
+                </ul>
+              </li>
+              <li>
+                4️⃣ Lộ trình phát triển sự nghiệp cho sinh viên
+                <ul>
+                  <li>"Khởi đầu hôm nay, thành công ngày mai!"</li>
+                  <li>"Lên kế hoạch, vươn xa – Phát triển sự nghiệp theo lộ trình!"</li>
+                  <li>"Hãy tạo dấu ấn trong sự nghiệp ngay từ khi còn ngồi trên ghế nhà trường!"</li>
+                </ul>
+              </li>
+            </ul>
+            <p>Bạn hãy chọn số từ 1-4 hoặc đặt câu hỏi về chuyên ngành, kỹ năng, nghề nghiệp nhé!</p>
+          </div>
+        `;
+      }
+      return "";
+    }
 
     // Hàm lấy dữ liệu nghề nghiệp từ Google Sheets
     async function fetchJobDataFromSheet() {
@@ -724,57 +802,61 @@
         ],
       });
 
-      // Updated system prompt to handle numeric inputs (1-4) correctly
-      await chat.sendMessage(`Bạn là trợ lý AI chuyên về tư vấn hướng nghiệp theo mô hình Holland RIASEC.
-Khi người dùng nhập số từ 1 đến 4, hãy phản hồi chính xác như sau:
-1: "Khám phá kiểu tính cách Holland của bạn"
-2: "Tìm hiểu về 6 nhóm tính cách RIASEC"
-3: "Phân tích nghề nghiệp phù hợp với tính cách"
-4: "Tư vấn lộ trình phát triển cụ thể"
-Nếu không phải là số từ 1-4, hãy trả lời bình thường.`);
+      // Thay đổi: Không hiển thị welcomeMessage mặc định, mà hiển thị chọn mode
+      document.getElementById("chatbox").innerHTML = renderModeSelection();
 
-      // Updated system prompt for exploring Holland personality type
-      await chat.sendMessage(`Khi người dùng muốn khám phá kiểu tính cách Holland của mình, hãy thực hiện theo các bước sau:
-1. Giới thiệu về mô hình Holland: "Holland Code phân loại tính cách nghề nghiệp thành 6 nhóm chính: Realistic (R), Investigative (I), Artistic (A), Social (S), Enterprising (E), Conventional (C). Mỗi nhóm có những đặc điểm và sở thích nghề nghiệp riêng."
-2. Hướng dẫn tự khám phá: "Để khám phá kiểu tính cách của mình, bạn hãy trả lời một số câu hỏi về sở thích và xu hướng công việc. Dựa trên các câu trả lời, tôi sẽ giúp bạn xác định nhóm tính cách phù hợp nhất."
-3. Cung cấp bài kiểm tra ngắn (nếu cần): "Nếu bạn muốn, tôi có thể giúp bạn làm một bài kiểm tra ngắn để xác định nhóm tính cách Holland của mình. Bạn có muốn bắt đầu không?"
-4. Giải thích kết quả và gợi ý nghề nghiệp: "Sau khi hoàn thành bài kiểm tra, tôi sẽ giải thích về kiểu tính cách của bạn và gợi ý các nghề nghiệp phù hợp. Ví dụ: Nếu bạn có tính cách 'Investigative', bạn có thể thích nghề nghiên cứu viên, kỹ sư hoặc nhà phân tích dữ liệu."
-5. Khuyến khích tự khám phá thêm: "Bạn có thể tìm hiểu thêm về các nhóm tính cách khác và những nghề nghiệp liên quan. Tôi sẵn sàng cung cấp thêm thông tin chi tiết nếu bạn cần."
-`);
-
-      // Add welcome message when chat initializes
-      const welcomeMessage = `
-        <div class="message bot-message">
-          <p><strong>Bot:</strong> Xin chào! Mình là trợ lý AI tư vấn hướng nghiệp theo mô hình Holland RIASEC.</p>
-          <p>Để giúp bạn tìm ra nghề nghiệp phù hợp, hãy chọn một chủ đề để bắt đầu:</p>
-          <ul>
-            <li>1️⃣ Khám phá kiểu tính cách Holland của bạn</li>
-            <li>2️⃣ Tìm hiểu về 6 nhóm tính cách RIASEC</li>
-            <li>3️⃣ Phân tích nghề nghiệp phù hợp với tính cách</li>
-            <li>4️⃣ Tư vấn lộ trình phát triển cụ thể</li>
-          </ul>
-          <p>Bạn hãy chọn số từ 1-4 hoặc đặt câu hỏi về bất kỳ chủ đề nào bạn quan tâm nhé!</p>
-        </div>
-      `;
-      document.getElementById("chatbox").innerHTML = welcomeMessage;
+      // Lắng nghe chọn mode
+      document.getElementById("chatbox").addEventListener("click", async (e) => {
+        if (e.target && e.target.id === "mode-hocsinh") {
+          userMode = "hocsinh";
+          document.getElementById("chatbox").innerHTML = renderWelcomeByMode(userMode);
+        }
+        if (e.target && e.target.id === "mode-sinhvien") {
+          userMode = "sinhvien";
+          document.getElementById("chatbox").innerHTML = renderWelcomeByMode(userMode);
+        }
+      });
 
       async function handleUserChoice(choice) {
         let nextPrompt = '';
-        switch(choice) {
-          case '1':
-            nextPrompt = "Khám phá kiểu tính cách Holland của bạn";
-            break;
-          case '2':
-            nextPrompt = "Tìm hiểu về 6 nhóm tính cách RIASEC";
-            break;
-          case '3':
-            nextPrompt = "Phân tích nghề nghiệp phù hợp với tính cách";
-            break;
-          case '4':
-            nextPrompt = "Tư vấn lộ trình phát triển cụ thể";
-            break;
-          default:
-            return false;
+        if (userMode === "hocsinh") {
+          switch(choice) {
+            case '1':
+              nextPrompt = "Khám phá kiểu tính cách Holland của bạn";
+              break;
+            case '2':
+              nextPrompt = "Tìm hiểu về 6 nhóm tính cách RIASEC";
+              break;
+            case '3':
+              nextPrompt = "Phân tích nghề nghiệp phù hợp với tính cách";
+              break;
+            case '4':
+              nextPrompt = "Tư vấn lộ trình phát triển cụ thể";
+              break;
+            default:
+              return false;
+          }
+        } else if (userMode === "sinhvien") {
+          switch(choice) {
+            case '1':
+              nextPrompt = "Chọn chuyên ngành phù hợp với bản thân";
+              break;
+            case '2':
+              nextPrompt = "Kỹ năng cần thiết cho sinh viên ngành CNTT";
+              break;
+            case '3':
+              nextPrompt = "Cơ hội nghề nghiệp sau khi tốt nghiệp";
+              break;
+            case '4':
+              nextPrompt = "Lộ trình phát triển sự nghiệp cho sinh viên";
+              break;
+            default:
+              return false;
+          }
+        } else {
+          // Nếu chưa chọn mode, yêu cầu chọn mode
+          document.getElementById("chatbox").innerHTML += renderModeSelection();
+          return true;
         }
         
         document.getElementById("chatbox").innerHTML += `
@@ -798,6 +880,13 @@ Nếu không phải là số từ 1-4, hãy trả lời bình thường.`);
       document.getElementById("send").addEventListener("click", async () => {
         const userMessage = document.getElementById("userMessage").value;
         if (!userMessage.trim()) return;
+
+        // Nếu chưa chọn mode, yêu cầu chọn mode trước
+        if (!userMode) {
+          document.getElementById("chatbox").innerHTML += renderModeSelection();
+          document.getElementById("userMessage").value = '';
+          return;
+        }
         
         document.getElementById("chatbox").innerHTML += `
           <div class="message user-message">
@@ -818,7 +907,14 @@ Nếu không phải là số từ 1-4, hãy trả lời bình thường.`);
         let responseText = jobData.find(([question]) => userMessage.includes(question))?.[1];
         
         if (!responseText) {
-          const result = await chat.sendMessage(userMessage);
+          // Thêm prompt theo mode cho AI
+          let prompt = userMessage;
+          if (userMode === "hocsinh") {
+            prompt = `[Học sinh cấp 3 hỏi về hướng nghiệp Holland] ${userMessage}`;
+          } else if (userMode === "sinhvien") {
+            prompt = `[Sinh viên hỏi về chuyên ngành, kỹ năng, nghề nghiệp] ${userMessage}`;
+          }
+          const result = await chat.sendMessage(prompt);
           const response = await result.response;
           responseText = response.text();
         }
@@ -879,7 +975,8 @@ Nếu không phải là số từ 1-4, hãy trả lời bình thường.`);
 
       // Add clear chat functionality
       document.getElementById('clearChat').addEventListener('click', () => {
-        document.getElementById('chatbox').innerHTML = welcomeMessage;
+        userMode = null;
+        document.getElementById('chatbox').innerHTML = renderModeSelection();
       });
     }
 
@@ -917,4 +1014,4 @@ Nếu không phải là số từ 1-4, hãy trả lời bình thường.`);
   <!-- Add Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </body>
-</html>
+</html> 
